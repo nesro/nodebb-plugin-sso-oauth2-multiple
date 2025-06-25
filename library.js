@@ -355,11 +355,8 @@ OAuth.updateProfile = async (hookData) => {
 	for (const nameId of names.map(name => `${name}Id`)) {
 		if (typeof data[nameId] === 'number') {
 			winston.verbose(`[plugins/sso-auth0] uid ${uid} setting up ${nameId}=${data[nameId]}`);
-
-			// TODO make this work as well?
 			await db.setObjectField(`user:${uid}`, nameId, data[nameId]);
-
-			await db.setObjectField(`${payload.name}Id:uid`, nameId, uid);
+			await db.setObjectField(`${nameId}:uid`, nameId, uid);
 		}
 	}
 	return hookData;
