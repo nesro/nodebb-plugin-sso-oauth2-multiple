@@ -365,7 +365,10 @@ OAuth.updateProfile = async (hookData) => {
 		if (typeof data[nameId] === 'number') {
 			winston.verbose(`[plugins/sso-auth0] uid ${uid} setting up ${nameId}=${data[nameId]}`);
 			await user.setUserField(uid, nameId, data[nameId]);
-			await db.setObjectField(`${nameId}:uid`, uid, data[nameId]);	
+			await db.setObjectField(`${nameId}:uid`, data[nameId], uid);
+
+			// await user.setUserField(uid, `${payload.name}Id`, payload.oAuthid);
+			// await db.setObjectField(`${payload.name}Id:uid`, payload.oAuthid, uid);
 		}
 	}
 	return hookData;
