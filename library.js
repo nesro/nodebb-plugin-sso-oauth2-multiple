@@ -96,6 +96,9 @@ OAuth.loadStrategies = async (strategies) => {
 			return done(new Error('insufficient-scope'));
 		}
 		try {
+
+			winston.verbose(`[plugins/sso-auth0] NESRO calling OAuth login oAuthid=${id}, handle=${displayName}, email=${email}, email_verified=${email_verified}`);
+
 			const user = await OAuth.login({
 				name,
 				oAuthid: id,
@@ -212,6 +215,9 @@ OAuth.getAssociations = async () => {
 };
 
 OAuth.login = async (payload) => {
+
+winston.verbose(`[plugins/sso-auth0] NESRO calling login, payload=${JSON.stringify(payload)}`);
+
 	let uid = await OAuth.getUidByOAuthid(payload.name, payload.oAuthid);
 	if (uid !== null) {
 		// Existing User
@@ -229,7 +235,7 @@ OAuth.login = async (payload) => {
 	if (email && email_verified) {
 		uid = await user.getUidByEmail(payload.email);
 	}
-
+winston.verbose(`[plugins/sso-auth0] NESRO  login no UID! will create user with handle`);
 	if (!uid) {
 		// New user
 		uid = await user.create({
