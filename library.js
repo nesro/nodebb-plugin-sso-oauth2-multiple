@@ -220,9 +220,12 @@ winston.verbose(`[plugins/sso-auth0] NESRO calling login, payload=${JSON.stringi
 
 	let uid = await OAuth.getUidByOAuthid(payload.name, payload.oAuthid);
 	if (uid !== null) {
+		winston.verbose(`[plugins/sso-auth0] NESRO found by uid=${uid}`);
 		// Existing User
 		return ({ uid });
 	}
+
+winston.verbose(`[plugins/sso-auth0] NESRO calling login, no uid found, trying email`);
 
 	const { trustEmailVerified } = await OAuth.getStrategy(payload.name);
 	const { email } = payload;
@@ -254,7 +257,7 @@ winston.verbose(`[plugins/sso-auth0] NESRO  login no UID! will create user with 
 
 	// Save provider-specific information to the user
 	await user.setUserField(uid, `${payload.name}Id`, payload.oAuthid);
-	await db.setObjectField(`${payload.name}Id:uid`, payload.oAuthid, uid);
+	await db.setObjectField(`${payload.name}Id:uid`, payload.oAuthid, uid); // NESRO: why? this will create one big object in mongo
 
 	return { uid };
 };
@@ -352,7 +355,11 @@ OAuth.updateProfile = async (hookData) => {
 	for (const nameId of names.map(name => `${name}Id`)) {
 		if (typeof data[nameId] === 'number') {
 			winston.verbose(`[plugins/sso-auth0] uid ${uid} setting up ${nameId}=${data[nameId]}`);
+
+			// TODO make this work as well?
 			await db.setObjectField(`user:${uid}`, nameId, data[nameId]);
+
+			await db.setObjectField(`${payload.name}Id:uid`, nameId, uid);
 		}
 	}
 	return hookData;
