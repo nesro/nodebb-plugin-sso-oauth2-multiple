@@ -237,6 +237,7 @@ winston.verbose(`[plugins/sso-auth0] NESRO calling login, no uid found, trying e
 	// Check for user via email fallback
 	if (email && email_verified) {
 		uid = await user.getUidByEmail(payload.email);
+		winston.verbose(`[plugins/sso-auth0] NESRO found uid=${uid} by email ${payload.email}`);
 	}
 winston.verbose(`[plugins/sso-auth0] NESRO  login no UID! will create user with handle`);
 	if (!uid) {
@@ -253,6 +254,8 @@ winston.verbose(`[plugins/sso-auth0] NESRO  login no UID! will create user with 
 				await user.email.confirmByUid(uid);
 			}
 		}
+
+		winston.verbose(`[plugins/sso-auth0] NESRO  login no UID! will create user with handle=${payload.handle}`);
 	}
 
 	// Save provider-specific information to the user
@@ -307,7 +310,12 @@ OAuth.updateProfile = async (uid, profile) => {
 	await user.updateProfile(uid, payload, allowList);
 };
 
-OAuth.getUidByOAuthid = async (name, oAuthid) => db.getObjectField(`${name}Id:uid`, oAuthid);
+OAuth.getUidByOAuthid = async (name, oAuthid) => {
+	const key = `${name}Id:uid`;
+	const field = oAuthid;
+	winston.verbose(`[plugins/sso-auth0] getUidByOAuthid, key=${key}, field=${field}`);
+	return db.getObjectField(key, field);
+}
 
 OAuth.deleteUserData = async (data) => {
 	const names = await db.getSortedSetMembers('oauth2-multiple:strategies');
