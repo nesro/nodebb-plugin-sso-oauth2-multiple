@@ -239,7 +239,7 @@ winston.verbose(`[plugins/sso-auth0] NESRO calling login, no uid found, trying e
 		uid = await user.getUidByEmail(payload.email);
 		winston.verbose(`[plugins/sso-auth0] NESRO found uid=${uid} by email ${payload.email}`);
 	}
-winston.verbose(`[plugins/sso-auth0] NESRO  login no UID! will create user with handle`);
+
 	if (!uid) {
 		// New user
 		uid = await user.create({
@@ -364,8 +364,8 @@ OAuth.updateProfile = async (hookData) => {
 	for (const nameId of names.map(name => `${name}Id`)) {
 		if (typeof data[nameId] === 'number') {
 			winston.verbose(`[plugins/sso-auth0] uid ${uid} setting up ${nameId}=${data[nameId]}`);
-			await db.setObjectField(`user:${uid}`, nameId, data[nameId]);
-			await db.setObjectField(`${nameId}:uid`, uid, data[nameId]);
+			await user.setUserField(uid, nameId, data[nameId]);
+			await db.setObjectField(`${nameId}:uid`, uid, data[nameId]);	
 		}
 	}
 	return hookData;
