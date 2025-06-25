@@ -326,3 +326,11 @@ OAuth.whitelistFields = async (params) => {
 
 	return params;
 };
+
+// This allows setting up the ids via API
+OAuth.updateProfile = async (hookData) => {
+	const names = await db.getSortedSetMembers('oauth2-multiple:strategies');
+	hookData.fields.push(...names.map(name => `${name}Id`));
+
+	return hookData;
+};
